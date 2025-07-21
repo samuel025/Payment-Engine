@@ -23,5 +23,5 @@ public class PaymentRequestDTO {
     private String description;
     private String createdAt;
     private LocalDateTime updatedAt;
-    private List<TransactionDTO> transactions;
+//    private List<TransactionDTO> transactions;
 }

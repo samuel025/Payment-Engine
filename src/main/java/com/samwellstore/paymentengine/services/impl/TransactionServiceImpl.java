@@ -13,6 +13,8 @@ import com.samwellstore.paymentengine.utils.mapper.Mapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -36,9 +38,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    public TransactionDTO processTransaction(TransactionDTO transactionDTO) {
+    public TransactionDTO processTransaction(TransactionDTO transactionDTO, String ref) {
         Transaction transactionEntity = transactionMapper.mapFrom(transactionDTO);
-        PaymentRequest paymentEntity = paymentRequestRepository.findByReference(transactionEntity.getPaymentRequest().getReference()).orElseThrow(() -> new EntityNotFoundException("Payment request not found"));
+        PaymentRequest paymentEntity = paymentRequestRepository.findByReference(ref).orElseThrow(() -> new EntityNotFoundException("Payment request not found"));
         if(paymentEntity.getStatus() != PaymentStatus.PENDING){
             throw new RuntimeException("Payment request has been processed");
         }
@@ -67,4 +69,16 @@ public class TransactionServiceImpl implements TransactionService {
         paymentRequestRepository.save(paymentEntity);
         return transactionMapper.mapTo(savedTransaction);
     }
+
+    @Override
+    public TransactionDTO findTransactionByReference(String ref){
+        Transaction transaction = transactionRepository.findByTransactionReference(ref).orElseThrow(() -> new EntityNotFoundException("Transaction reference not found"));
+        return transactionMapper.mapTo(transaction);
+    }
+
+    @Override
+    public Page<TransactionDTO> getAllTransactions(Pageable pageable){
+        return transactionRepository.findAll(pageable).map(transactionMapper::mapTo);
+    }
+
 }
