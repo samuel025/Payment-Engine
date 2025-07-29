@@ -9,11 +9,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MerchantDTO {
+public class CustomerSignUpResponseDTO {
     private Long id;
     private String firstName;
     private String lastName;
-    private String businessName;
-    private String callbackUrl;
-    private String walletBalance;
+    private String address;
+
+    //If merchant
+//    private String businessName;
+//    private String callbackUrl;
+//    private String walletBalance;
 }

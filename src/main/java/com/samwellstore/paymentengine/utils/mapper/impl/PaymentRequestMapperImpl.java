@@ -1,5 +1,7 @@
 package com.samwellstore.paymentengine.utils.mapper.impl;
 
+import com.samwellstore.paymentengine.dto.CustomerDTO;
+import com.samwellstore.paymentengine.dto.MerchantDTO;
 import com.samwellstore.paymentengine.dto.PaymentRequestDTO;
 import com.samwellstore.paymentengine.entities.PaymentRequest;
 import com.samwellstore.paymentengine.utils.mapper.Mapper;
@@ -9,19 +11,65 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PaymentRequestMapperImpl implements Mapper<PaymentRequest, PaymentRequestDTO> {
-    private ModelMapper modelMapper;
+    
+    private final ModelMapper modelMapper;
+    
     public PaymentRequestMapperImpl(ModelMapper modelMapper) {
         this.modelMapper = modelMapper;
     }
 
     @Override
     public PaymentRequestDTO mapTo(PaymentRequest paymentRequest) {
-        return modelMapper.map(paymentRequest, PaymentRequestDTO.class);
+        if (paymentRequest == null) {
+            return null;
+        }
+        
+        // Manual mapping to avoid conflicts
+        PaymentRequestDTO dto = PaymentRequestDTO.builder()
+                .id(paymentRequest.getId())
+                .amount(paymentRequest.getAmount())
+                .reference(paymentRequest.getReference())
+                .status(paymentRequest.getStatus())
+                .description(paymentRequest.getDescription())
+                .customerEmail(paymentRequest.getCustomerEmail())
+                .customerName(paymentRequest.getCustomerName())
+                .customerPhone(paymentRequest.getCustomerPhone())
+                .build();
+                
+        // Map merchant separately if it exists
+        if (paymentRequest.getMerchant() != null) {
+            MerchantDTO merchantDTO = modelMapper.map(paymentRequest.getMerchant(), MerchantDTO.class);
+            dto.setMerchant(merchantDTO);
+        }
+
+        
+        return dto;
     }
 
     @Override
-    public PaymentRequest mapFrom(PaymentRequestDTO paymentRequestDTO ){
-        return modelMapper.map(paymentRequestDTO, PaymentRequest.class);
-    }
+    public PaymentRequest mapFrom(PaymentRequestDTO paymentRequestDTO) {
+        if (paymentRequestDTO == null) {
+            return null;
+        }
+        
+        // Manual mapping to avoid conflicts
+        PaymentRequest entity = PaymentRequest.builder()
+                .id(paymentRequestDTO.getId())
+                .amount(paymentRequestDTO.getAmount())
+                .reference(paymentRequestDTO.getReference())
+                .status(paymentRequestDTO.getStatus())
+                .description(paymentRequestDTO.getDescription())
+                .customerEmail(paymentRequestDTO.getCustomerEmail())
+                .customerName(paymentRequestDTO.getCustomerName())
+                .customerPhone(paymentRequestDTO.getCustomerPhone())
+                .build();
+                
+        // Map merchant separately if it exists
+        if (paymentRequestDTO.getMerchant() != null) {
+            entity.setMerchant(modelMapper.map(paymentRequestDTO.getMerchant(), com.samwellstore.paymentengine.entities.Merchant.class));
+        }
 
+        
+        return entity;
+    }
 }

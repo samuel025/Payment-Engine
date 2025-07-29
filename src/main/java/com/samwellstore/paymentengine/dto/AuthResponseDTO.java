@@ -1,5 +1,6 @@
 package com.samwellstore.paymentengine.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,11 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MerchantDTO {
-    private Long id;
-    private String firstName;
-    private String lastName;
-    private String businessName;
-    private String callbackUrl;
-    private String walletBalance;
+public class AuthResponseDTO {
+    private String token;
+    private String message;
 }

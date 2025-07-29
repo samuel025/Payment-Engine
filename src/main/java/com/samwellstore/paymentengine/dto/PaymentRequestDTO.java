@@ -1,14 +1,14 @@
 package com.samwellstore.paymentengine.dto;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 import com.samwellstore.paymentengine.enums.PaymentStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -19,9 +19,11 @@ public class PaymentRequestDTO {
     private MerchantDTO merchant;
     private BigDecimal amount;
     private String reference;
-    private PaymentStatus paymentStatus;
+    private PaymentStatus status;
     private String description;
-    private String createdAt;
-    private LocalDateTime updatedAt;
 //    private List<TransactionDTO> transactions;
+
+    private String customerEmail;
+    private String customerName;
+    private String customerPhone;
 }

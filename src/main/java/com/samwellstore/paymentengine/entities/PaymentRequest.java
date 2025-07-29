@@ -26,6 +26,10 @@ public class PaymentRequest {
     @JoinColumn(name = "merchant_id", nullable = false)
     private Merchant merchant;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
 
@@ -38,13 +42,22 @@ public class PaymentRequest {
 
     private String description;
 
+    //If no customer is provided, these fields can be used to capture customer details
+    @Column(name = "customer_email")
+    private String customerEmail;
+
+    @Column(name = "customer_name")
+    private String customerName;
+
+    @Column(name = "customer_phone")
+    private String customerPhone;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // One PaymentRequest can have Many Transactions (though business logic allows only one SUCCESS)
     @OneToMany(mappedBy = "paymentRequest", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Transaction> transactions;
 
@@ -58,5 +71,4 @@ public class PaymentRequest {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
 }

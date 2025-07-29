@@ -6,8 +6,9 @@ import com.samwellstore.paymentengine.entities.Merchant;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+
 public interface MerchantService {
-    public MerchantDTO createMerchant(MerchantDTO merchant);
-    public Optional<BigDecimal> getMerchantWalletBalance(Long id);
-    public void creditWallet(Long id, BigDecimal amount);
+     MerchantDTO createMerchant(MerchantDTO merchant);
+     Optional<BigDecimal> getMerchantWalletBalance(Long id);
+     void creditWallet(Long id, BigDecimal amount);
 }
