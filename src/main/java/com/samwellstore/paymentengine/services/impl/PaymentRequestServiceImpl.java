@@ -1,6 +1,8 @@
 package com.samwellstore.paymentengine.services.impl;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.samwellstore.paymentengine.Repositories.CustomerRepository;
 import com.samwellstore.paymentengine.entities.Customer;
@@ -104,4 +106,16 @@ public class PaymentRequestServiceImpl implements PaymentRequestService {
             .orElseThrow(() -> new EntityNotFoundException("Payment not found with reference: " + reference));
     return paymentMapper.mapTo(paymentRequest);
     }
+
+    @Override
+    public List<PaymentRequestDTO> getPayments() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication != null && authentication.getPrincipal() instanceof UserPrincipal userPrincipal && ((UserPrincipal) authentication.getPrincipal()).getUserType().equals(Roles.CUSTOMER)) {
+            List<PaymentRequest> paymentRequests = paymentRequestRepository.findByCustomerId(userPrincipal.getId());
+            return paymentRequests.stream().map(paymentRequest -> paymentMapper.mapTo(paymentRequest)).collect(Collectors.toList());
+        } else {
+            throw new IllegalArgumentException("Customer authentication required");
+        }
+    }
+
 }

@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 public class PaymentRequestController {
     final PaymentRequestService paymentRequestService;
@@ -20,6 +22,12 @@ public class PaymentRequestController {
     public ResponseEntity<PaymentRequestDTO> createPaymentRequest(@RequestBody PaymentRequestDTO paymentRequestDTO) {
         PaymentRequestDTO savedPaymentRequest = paymentRequestService.createPayment(paymentRequestDTO);
         return new ResponseEntity<>(savedPaymentRequest, HttpStatus.CREATED);
+    }
+
+    @GetMapping(path = "/payment")
+    public ResponseEntity<List<PaymentRequestDTO>> getPaymentRequests() {
+        List<PaymentRequestDTO> paymentRequestDTOS = paymentRequestService.getPayments();
+        return new ResponseEntity<>(paymentRequestDTOS, HttpStatus.OK);
     }
 
     @GetMapping(path = "/payment/{reference}")

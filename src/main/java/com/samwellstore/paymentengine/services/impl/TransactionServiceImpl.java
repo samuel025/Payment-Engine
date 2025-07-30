@@ -6,7 +6,9 @@ import com.samwellstore.paymentengine.dto.TransactionDTO;
 import com.samwellstore.paymentengine.entities.PaymentRequest;
 import com.samwellstore.paymentengine.entities.Transaction;
 import com.samwellstore.paymentengine.enums.PaymentStatus;
+import com.samwellstore.paymentengine.enums.Roles;
 import com.samwellstore.paymentengine.enums.TransactionStatus;
+import com.samwellstore.paymentengine.security.UserPrincipal;
 import com.samwellstore.paymentengine.services.MerchantService;
 import com.samwellstore.paymentengine.services.TransactionService;
 import com.samwellstore.paymentengine.utils.mapper.Mapper;
@@ -15,6 +17,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -39,6 +43,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public TransactionDTO processTransaction(TransactionDTO transactionDTO, String ref) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Transaction transactionEntity = transactionMapper.mapFrom(transactionDTO);
         PaymentRequest paymentEntity = paymentRequestRepository.findByReference(ref).orElseThrow(() -> new EntityNotFoundException("Payment request not found"));
         if(paymentEntity.getStatus() != PaymentStatus.PENDING){
@@ -51,23 +56,52 @@ public class TransactionServiceImpl implements TransactionService {
         transactionEntity.setPaymentRequest(paymentEntity);
         transactionEntity.setTransactionReference("TXN_" + UUID.randomUUID().toString().substring(0, 8));
         boolean isSuccessful = Math.random() > 0.5;
-        if(isSuccessful){
-            transactionEntity.setStatus(TransactionStatus.SUCCESS);
-            paymentEntity.setStatus(PaymentStatus.PAID);
-            merchantService.creditWallet(paymentEntity.getMerchant().getId(),
-                    paymentEntity.getAmount());
-        } else {
-            transactionEntity.setStatus(TransactionStatus.FAILED);
-            long failedAttempts = paymentEntity.getTransactions().stream()
-                    .filter(t -> t.getStatus().equals(TransactionStatus.FAILED))
-                    .count() + 1;
-            if(failedAttempts >= 3) {
-                paymentEntity.setStatus(PaymentStatus.FAILED);
+
+        //If user is authenticated and is a customer that made the payment request
+        if(authentication != null && authentication.getPrincipal() instanceof UserPrincipal userPrincipal && ((UserPrincipal) authentication.getPrincipal()).getUserType().equals(Roles.CUSTOMER) && paymentEntity.getCustomer().getId().equals(userPrincipal.getId())) {
+            if (isSuccessful) {
+                transactionEntity.setStatus(TransactionStatus.SUCCESS);
+                paymentEntity.setStatus(PaymentStatus.PAID);
+                merchantService.creditWallet(paymentEntity.getMerchant().getId(),
+                        paymentEntity.getAmount());
+            } else {
+                transactionEntity.setStatus(TransactionStatus.FAILED);
+                long failedAttempts = paymentEntity.getTransactions().stream()
+                        .filter(t -> t.getStatus().equals(TransactionStatus.FAILED))
+                        .count() + 1;
+                if (failedAttempts >= 3) {
+                    paymentEntity.setStatus(PaymentStatus.FAILED);
+                }
             }
+            Transaction savedTransaction = transactionRepository.save(transactionEntity);
+            paymentRequestRepository.save(paymentEntity);
+            return transactionMapper.mapTo(savedTransaction);
+
+            //If user is not authenticated (Anonymous user)
+        } else if (authentication != null  && authentication.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_ANONYMOUS"))
+                && paymentEntity.getCustomerName() != null
+                && paymentEntity.getCustomerEmail() != null
+                && paymentEntity.getCustomerPhone() != null) {
+            if (isSuccessful) {
+                transactionEntity.setStatus(TransactionStatus.SUCCESS);
+                paymentEntity.setStatus(PaymentStatus.PAID);
+                merchantService.creditWallet(paymentEntity.getMerchant().getId(),
+                        paymentEntity.getAmount());
+            } else {
+                transactionEntity.setStatus(TransactionStatus.FAILED);
+                long failedAttempts = paymentEntity.getTransactions().stream()
+                        .filter(t -> t.getStatus().equals(TransactionStatus.FAILED))
+                        .count() + 1;
+                if (failedAttempts >= 3) {
+                    paymentEntity.setStatus(PaymentStatus.FAILED);
+                }
+            }
+            Transaction savedTransaction = transactionRepository.save(transactionEntity);
+            paymentRequestRepository.save(paymentEntity);
+            return transactionMapper.mapTo(savedTransaction);
+        } else  {
+            throw new IllegalArgumentException("Invalid transaction request. Ensure you are authenticated or provide valid customer details.");
         }
-        Transaction savedTransaction = transactionRepository.save(transactionEntity);
-        paymentRequestRepository.save(paymentEntity);
-        return transactionMapper.mapTo(savedTransaction);
     }
 
     @Override
