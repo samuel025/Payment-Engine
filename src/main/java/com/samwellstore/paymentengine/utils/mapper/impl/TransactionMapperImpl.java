@@ -1,9 +1,7 @@
 package com.samwellstore.paymentengine.utils.mapper.impl;
 
-import com.samwellstore.paymentengine.dto.MerchantDTO;
 import com.samwellstore.paymentengine.dto.PaymentRequestDTO;
 import com.samwellstore.paymentengine.dto.TransactionDTO;
-import com.samwellstore.paymentengine.entities.Merchant;
 import com.samwellstore.paymentengine.entities.PaymentRequest;
 import com.samwellstore.paymentengine.entities.Transaction;
 import com.samwellstore.paymentengine.utils.mapper.Mapper;

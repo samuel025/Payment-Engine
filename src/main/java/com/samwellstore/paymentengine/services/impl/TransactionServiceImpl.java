@@ -58,7 +58,10 @@ public class TransactionServiceImpl implements TransactionService {
         boolean isSuccessful = Math.random() > 0.5;
 
         //If user is authenticated and is a customer that made the payment request
-        if(authentication != null && authentication.getPrincipal() instanceof UserPrincipal userPrincipal && ((UserPrincipal) authentication.getPrincipal()).getUserType().equals(Roles.CUSTOMER) && paymentEntity.getCustomer().getId().equals(userPrincipal.getId())) {
+        if(authentication != null
+                && authentication.getPrincipal() instanceof UserPrincipal userPrincipal
+                && ((UserPrincipal) authentication.getPrincipal()).getUserType().equals(Roles.CUSTOMER)
+                && paymentEntity.getCustomer().getId().equals(userPrincipal.getId())) {
             if (isSuccessful) {
                 transactionEntity.setStatus(TransactionStatus.SUCCESS);
                 paymentEntity.setStatus(PaymentStatus.PAID);

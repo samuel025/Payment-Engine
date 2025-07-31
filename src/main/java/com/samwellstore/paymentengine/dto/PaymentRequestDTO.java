@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PaymentRequestDTO {
     private Long id;
-    private MerchantDTO merchant;
+    private MerchantWithoutBalanceDTO merchant;
     private BigDecimal amount;
     private String reference;
     private PaymentStatus status;

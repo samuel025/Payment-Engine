@@ -2,6 +2,7 @@ package com.samwellstore.paymentengine.utils.mapper.impl;
 
 import com.samwellstore.paymentengine.dto.CustomerDTO;
 import com.samwellstore.paymentengine.dto.MerchantDTO;
+import com.samwellstore.paymentengine.dto.MerchantWithoutBalanceDTO;
 import com.samwellstore.paymentengine.dto.PaymentRequestDTO;
 import com.samwellstore.paymentengine.entities.PaymentRequest;
 import com.samwellstore.paymentengine.utils.mapper.Mapper;
@@ -38,8 +39,8 @@ public class PaymentRequestMapperImpl implements Mapper<PaymentRequest, PaymentR
                 
         // Map merchant separately if it exists
         if (paymentRequest.getMerchant() != null) {
-            MerchantDTO merchantDTO = modelMapper.map(paymentRequest.getMerchant(), MerchantDTO.class);
-            dto.setMerchant(merchantDTO);
+            MerchantWithoutBalanceDTO merchantWithoutBalanceDTO = modelMapper.map(paymentRequest.getMerchant(), MerchantWithoutBalanceDTO.class);
+            dto.setMerchant(merchantWithoutBalanceDTO);
         }
 
         

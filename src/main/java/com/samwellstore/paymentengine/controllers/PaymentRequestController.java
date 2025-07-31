@@ -2,6 +2,7 @@ package com.samwellstore.paymentengine.controllers;
 
 
 import com.samwellstore.paymentengine.dto.PaymentRequestDTO;
+import com.samwellstore.paymentengine.dto.TransactionDTO;
 import com.samwellstore.paymentengine.services.PaymentRequestService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -33,5 +34,11 @@ public class PaymentRequestController {
     @GetMapping(path = "/payment/{reference}")
     public ResponseEntity<PaymentRequestDTO> getPaymentRequestByReference(@PathVariable("reference") String reference) {
         return new ResponseEntity<>(paymentRequestService.getPaymentByReference(reference), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/payment/transactions/{paymentRequestId}")
+    public ResponseEntity<List<TransactionDTO>> getTransactionsByPaymentRequest(@PathVariable("paymentRequestId") Long paymentRequestId) {
+        List<TransactionDTO> transactions = paymentRequestService.getTransactionsByPaymentRequest(paymentRequestId);
+        return new ResponseEntity<>(transactions, HttpStatus.OK);
     }
 }

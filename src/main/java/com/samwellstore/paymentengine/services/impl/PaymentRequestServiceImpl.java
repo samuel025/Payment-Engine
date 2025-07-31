@@ -5,7 +5,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.samwellstore.paymentengine.Repositories.CustomerRepository;
+import com.samwellstore.paymentengine.dto.TransactionDTO;
 import com.samwellstore.paymentengine.entities.Customer;
+import com.samwellstore.paymentengine.entities.Transaction;
 import com.samwellstore.paymentengine.enums.Roles;
 import com.samwellstore.paymentengine.security.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,14 +31,17 @@ public class PaymentRequestServiceImpl implements PaymentRequestService {
     final PaymentRequestRepository paymentRequestRepository;
     final MerchantRepository merchantRepository;
     final CustomerRepository customerRepository;
+    final Mapper<PaymentRequest, PaymentRequestDTO> paymentMapper;
 
     @Autowired
-    private Mapper<PaymentRequest, PaymentRequestDTO> paymentMapper;
+    private Mapper<Transaction, TransactionDTO> transactionMapper;
 
-    public PaymentRequestServiceImpl(PaymentRequestRepository paymentRequestRepository, MerchantRepository merchantRepository, CustomerRepository customerRepository) {
+
+    public PaymentRequestServiceImpl(PaymentRequestRepository paymentRequestRepository, MerchantRepository merchantRepository, CustomerRepository customerRepository, Mapper<PaymentRequest, PaymentRequestDTO> paymentMapper) {
         this.paymentRequestRepository = paymentRequestRepository;
         this.merchantRepository = merchantRepository;
         this.customerRepository = customerRepository;
+        this.paymentMapper = paymentMapper;
     }
 
     @Override
@@ -44,9 +49,8 @@ public class PaymentRequestServiceImpl implements PaymentRequestService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         // Fix: Check if principal is actually a UserPrincipal before casting
-        if (authentication != null && authentication.getPrincipal() instanceof UserPrincipal) {
-            UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-            if (userPrincipal.getUserType().equals(Roles.MERCHANT)) {
+        if (authentication != null && authentication.getPrincipal() instanceof UserPrincipal userPrincipal) {
+            if (userPrincipal.getUserType().equals(Roles.MERCHANT) || userPrincipal.getUserType().equals(Roles.ADMIN)) {
                 throw new RuntimeException("Only customers can create payment requests");
             }
 
@@ -71,8 +75,7 @@ public class PaymentRequestServiceImpl implements PaymentRequestService {
             PaymentRequest savedPaymentRequest = paymentRequestRepository.save(paymentRequestEntity);
             return paymentMapper.mapTo(savedPaymentRequest);
         } else {
-            // Handle unauthenticated or non-UserPrincipal case
-            // This could be a public API endpoint or a different authentication method
+
             if (paymentRequestDTO.getMerchant() == null || paymentRequestDTO.getMerchant().getId() == null) {
                 throw new EntityNotFoundException("Merchant ID is required");
             }
@@ -112,10 +115,25 @@ public class PaymentRequestServiceImpl implements PaymentRequestService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if(authentication != null && authentication.getPrincipal() instanceof UserPrincipal userPrincipal && ((UserPrincipal) authentication.getPrincipal()).getUserType().equals(Roles.CUSTOMER)) {
             List<PaymentRequest> paymentRequests = paymentRequestRepository.findByCustomerId(userPrincipal.getId());
-            return paymentRequests.stream().map(paymentRequest -> paymentMapper.mapTo(paymentRequest)).collect(Collectors.toList());
+            return paymentRequests.stream().map(paymentMapper::mapTo).collect(Collectors.toList());
         } else {
             throw new IllegalArgumentException("Customer authentication required");
         }
     }
 
+    @Override
+    public List<TransactionDTO> getTransactionsByPaymentRequest(Long paymentRequestId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserPrincipal userPrincipal)) {
+            throw new IllegalArgumentException("User must be authenticated to access transactions");
+        }
+        PaymentRequest paymentRequest = paymentRequestRepository.findById(paymentRequestId)
+                .orElseThrow(() -> new EntityNotFoundException("Payment request not found with ID: " + paymentRequestId));
+        if (paymentRequest.getCustomer() != null && paymentRequest.getCustomer().getId().equals(userPrincipal.getId())) {
+            List<Transaction> transactions = paymentRequest.getTransactions();
+            return transactions.stream().map(transaction -> transactionMapper.mapTo(transaction)).collect(Collectors.toList());
+        } else {
+            throw new EntityNotFoundException("No transactions found for payment request with ID: " + paymentRequestId);
+        }
+    }
 }
