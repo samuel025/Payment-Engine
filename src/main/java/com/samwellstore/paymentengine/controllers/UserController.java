@@ -1,6 +1,8 @@
 package com.samwellstore.paymentengine.controllers;
 
 
+import com.samwellstore.paymentengine.dto.AdminDTOs.AddAdminDTO;
+import com.samwellstore.paymentengine.dto.AdminDTOs.AdminDTO;
 import com.samwellstore.paymentengine.dto.AuthenticationDTOs.AuthResponseDTO;
 import com.samwellstore.paymentengine.dto.AuthenticationDTOs.LoginRequestDTO;
 import com.samwellstore.paymentengine.dto.AuthenticationDTOs.SignUpRequestDTO;
@@ -28,5 +30,11 @@ public class UserController {
     public ResponseEntity<AuthResponseDTO> loginUser(@Valid @RequestBody LoginRequestDTO loginRequestDTO) {
         AuthResponseDTO authResponseDTO = authService.login(loginRequestDTO);
         return ResponseEntity.ok(authResponseDTO);
+    }
+
+    @PostMapping("/add-admin")
+    public ResponseEntity<AdminDTO> addAdmin(@Valid @RequestBody AddAdminDTO addAdminDTO) {
+        AdminDTO createdAdmin = authService.addAdmin(addAdminDTO);
+        return ResponseEntity.ok(createdAdmin);
     }
 }

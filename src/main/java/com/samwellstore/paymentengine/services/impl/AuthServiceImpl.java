@@ -1,14 +1,20 @@
 package com.samwellstore.paymentengine.services.impl;
 
+import com.samwellstore.paymentengine.Repositories.AdminRepository;
+import com.samwellstore.paymentengine.dto.AdminDTOs.AddAdminDTO;
+import com.samwellstore.paymentengine.dto.AdminDTOs.AdminDTO;
 import com.samwellstore.paymentengine.dto.AuthenticationDTOs.AuthResponseDTO;
 import com.samwellstore.paymentengine.dto.AuthenticationDTOs.LoginRequestDTO;
 import com.samwellstore.paymentengine.dto.AuthenticationDTOs.SignUpRequestDTO;
 import com.samwellstore.paymentengine.dto.CustomerDTOs.CustomerSignUpResponseDTO;
 import com.samwellstore.paymentengine.dto.MerchantDTOs.MerchantSignUpResponseDTO;
+import com.samwellstore.paymentengine.entities.Admin;
+import com.samwellstore.paymentengine.security.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +41,9 @@ public class AuthServiceImpl implements AuthService {
     private AuthenticationManager authenticationManager;
 
     @Autowired
+    private AdminRepository adminRepository;
+
+    @Autowired
     private JWTService jwtService;
 
     @Autowired
@@ -48,6 +57,12 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private Mapper<Customer, CustomerSignUpResponseDTO> customerToSignUpResponseDTOMapper;
+
+    @Autowired
+    private Mapper<Admin, AddAdminDTO> addAdminDTOMapper;
+
+    @Autowired
+    private Mapper<Admin, AdminDTO> adminDTOMapper;
 
     final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(12);
 
@@ -84,5 +99,21 @@ public class AuthServiceImpl implements AuthService {
             );
         }
         return null;
+    }
+
+    @Override
+    public AdminDTO addAdmin(AddAdminDTO addAdminDTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserPrincipal userPrincipal){
+            if( !userPrincipal.getUserType().equals(Roles.ADMIN)) {
+                throw new RuntimeException("Only admins can add other admins");
+            }
+            String hashedPassword = bCryptPasswordEncoder.encode(addAdminDTO.getPassword());
+            addAdminDTO.setPassword(hashedPassword);
+            Admin adminEntity = addAdminDTOMapper.mapFrom(addAdminDTO);
+            return adminDTOMapper.mapTo(adminRepository.save(adminEntity));
+        } else {
+            throw new IllegalArgumentException("Admin Authentication is required to add an admin");
+        }
     }
 }

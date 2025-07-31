@@ -1,9 +1,9 @@
-package com.samwellstore.paymentengine.services.impl;
+package com.samwellstore.paymentengine.security;
 
+import com.samwellstore.paymentengine.Repositories.AdminRepository;
 import com.samwellstore.paymentengine.Repositories.CustomerRepository;
 import com.samwellstore.paymentengine.Repositories.MerchantRepository;
 import com.samwellstore.paymentengine.entities.BaseUser;
-import com.samwellstore.paymentengine.security.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,6 +19,9 @@ public class UserDetailServiceImpl implements UserDetailsService {
     @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
+    private AdminRepository adminRepository;
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
@@ -26,7 +29,9 @@ public class UserDetailServiceImpl implements UserDetailsService {
         if(user == null){
             user = (BaseUser) customerRepository.findByEmail(email).orElse(null);
         }
-
+        if(user == null){
+            user = (BaseUser) adminRepository.findByEmail(email).orElse(null);
+        }
         if (user == null) {
             throw new UsernameNotFoundException("User not found with email: " + email);
         }

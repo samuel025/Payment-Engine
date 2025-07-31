@@ -1,6 +1,5 @@
 package com.samwellstore.paymentengine.security;
 
-import com.samwellstore.paymentengine.services.impl.UserDetailServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
