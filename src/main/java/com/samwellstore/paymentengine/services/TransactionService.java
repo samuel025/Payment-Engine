@@ -1,6 +1,6 @@
 package com.samwellstore.paymentengine.services;
 
-import com.samwellstore.paymentengine.dto.TransactionDTO;
+import com.samwellstore.paymentengine.dto.TransactionDTOs.TransactionDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

@@ -1,15 +1,12 @@
 package com.samwellstore.paymentengine.controllers;
 
-import com.samwellstore.paymentengine.dto.TransactionDTO;
+import com.samwellstore.paymentengine.dto.TransactionDTOs.TransactionDTO;
 import com.samwellstore.paymentengine.services.TransactionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 public class TransactionController {

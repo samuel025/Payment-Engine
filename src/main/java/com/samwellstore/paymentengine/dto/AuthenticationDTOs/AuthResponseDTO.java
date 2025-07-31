@@ -1,4 +1,4 @@
-package com.samwellstore.paymentengine.dto;
+package com.samwellstore.paymentengine.dto.AuthenticationDTOs;
 
 
 import lombok.AllArgsConstructor;

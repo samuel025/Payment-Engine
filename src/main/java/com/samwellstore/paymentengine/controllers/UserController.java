@@ -1,10 +1,9 @@
 package com.samwellstore.paymentengine.controllers;
 
 
-import com.samwellstore.paymentengine.dto.AuthResponseDTO;
-import com.samwellstore.paymentengine.dto.LoginRequestDTO;
-import com.samwellstore.paymentengine.dto.SignUpRequestDTO;
-import com.samwellstore.paymentengine.dto.CustomerSignUpResponseDTO;
+import com.samwellstore.paymentengine.dto.AuthenticationDTOs.AuthResponseDTO;
+import com.samwellstore.paymentengine.dto.AuthenticationDTOs.LoginRequestDTO;
+import com.samwellstore.paymentengine.dto.AuthenticationDTOs.SignUpRequestDTO;
 import com.samwellstore.paymentengine.services.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

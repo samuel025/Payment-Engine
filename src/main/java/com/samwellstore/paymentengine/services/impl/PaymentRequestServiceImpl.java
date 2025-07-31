@@ -5,19 +5,18 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.samwellstore.paymentengine.Repositories.CustomerRepository;
-import com.samwellstore.paymentengine.dto.TransactionDTO;
+import com.samwellstore.paymentengine.dto.TransactionDTOs.TransactionDTO;
 import com.samwellstore.paymentengine.entities.Customer;
 import com.samwellstore.paymentengine.entities.Transaction;
 import com.samwellstore.paymentengine.enums.Roles;
 import com.samwellstore.paymentengine.security.UserPrincipal;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.samwellstore.paymentengine.Repositories.MerchantRepository;
 import com.samwellstore.paymentengine.Repositories.PaymentRequestRepository;
-import com.samwellstore.paymentengine.dto.PaymentRequestDTO;
+import com.samwellstore.paymentengine.dto.PaymentRequestDTOs.PaymentRequestDTO;
 import com.samwellstore.paymentengine.entities.Merchant;
 import com.samwellstore.paymentengine.entities.PaymentRequest;
 import com.samwellstore.paymentengine.enums.PaymentStatus;
@@ -32,17 +31,17 @@ public class PaymentRequestServiceImpl implements PaymentRequestService {
     final MerchantRepository merchantRepository;
     final CustomerRepository customerRepository;
     final Mapper<PaymentRequest, PaymentRequestDTO> paymentMapper;
-
-    @Autowired
-    private Mapper<Transaction, TransactionDTO> transactionMapper;
+    final Mapper<Transaction, TransactionDTO> transactionMapper;
 
 
-    public PaymentRequestServiceImpl(PaymentRequestRepository paymentRequestRepository, MerchantRepository merchantRepository, CustomerRepository customerRepository, Mapper<PaymentRequest, PaymentRequestDTO> paymentMapper) {
+    public PaymentRequestServiceImpl(PaymentRequestRepository paymentRequestRepository, MerchantRepository merchantRepository, CustomerRepository customerRepository, Mapper<PaymentRequest, PaymentRequestDTO> paymentMapper, Mapper<Transaction, TransactionDTO> transactionMapper) {
         this.paymentRequestRepository = paymentRequestRepository;
         this.merchantRepository = merchantRepository;
         this.customerRepository = customerRepository;
         this.paymentMapper = paymentMapper;
+        this.transactionMapper = transactionMapper;
     }
+
 
     @Override
     public PaymentRequestDTO createPayment(PaymentRequestDTO paymentRequestDTO) {
@@ -131,7 +130,7 @@ public class PaymentRequestServiceImpl implements PaymentRequestService {
                 .orElseThrow(() -> new EntityNotFoundException("Payment request not found with ID: " + paymentRequestId));
         if (paymentRequest.getCustomer() != null && paymentRequest.getCustomer().getId().equals(userPrincipal.getId())) {
             List<Transaction> transactions = paymentRequest.getTransactions();
-            return transactions.stream().map(transaction -> transactionMapper.mapTo(transaction)).collect(Collectors.toList());
+            return transactions.stream().map(transactionMapper::mapTo).collect(Collectors.toList());
         } else {
             throw new EntityNotFoundException("No transactions found for payment request with ID: " + paymentRequestId);
         }

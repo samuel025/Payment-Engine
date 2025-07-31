@@ -1,7 +1,7 @@
 package com.samwellstore.paymentengine.services;
 
-import com.samwellstore.paymentengine.dto.PaymentRequestDTO;
-import com.samwellstore.paymentengine.dto.TransactionDTO;
+import com.samwellstore.paymentengine.dto.PaymentRequestDTOs.PaymentRequestDTO;
+import com.samwellstore.paymentengine.dto.TransactionDTOs.TransactionDTO;
 
 import java.util.List;
 

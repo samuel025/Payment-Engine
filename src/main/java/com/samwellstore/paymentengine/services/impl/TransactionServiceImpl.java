@@ -2,7 +2,7 @@ package com.samwellstore.paymentengine.services.impl;
 
 import com.samwellstore.paymentengine.Repositories.PaymentRequestRepository;
 import com.samwellstore.paymentengine.Repositories.TransactionRepository;
-import com.samwellstore.paymentengine.dto.TransactionDTO;
+import com.samwellstore.paymentengine.dto.TransactionDTOs.TransactionDTO;
 import com.samwellstore.paymentengine.entities.PaymentRequest;
 import com.samwellstore.paymentengine.entities.Transaction;
 import com.samwellstore.paymentengine.enums.PaymentStatus;
@@ -21,7 +21,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service

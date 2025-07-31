@@ -1,4 +1,4 @@
-package com.samwellstore.paymentengine.dto;
+package com.samwellstore.paymentengine.dto.AuthenticationDTOs;
 
 import com.samwellstore.paymentengine.enums.Roles;
 import jakarta.validation.constraints.Email;

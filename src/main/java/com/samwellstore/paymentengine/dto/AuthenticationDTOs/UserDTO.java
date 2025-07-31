@@ -1,5 +1,7 @@
-package com.samwellstore.paymentengine.dto;
+package com.samwellstore.paymentengine.dto.AuthenticationDTOs;
 
+
+import com.samwellstore.paymentengine.enums.Roles;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,9 +11,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MerchantWithoutBalanceDTO {
+public class UserDTO {
     private Long id;
+    private String email;
     private String firstName;
     private String lastName;
-    private String businessName;
+    private String phoneNumber;
+    private Roles role;
 }

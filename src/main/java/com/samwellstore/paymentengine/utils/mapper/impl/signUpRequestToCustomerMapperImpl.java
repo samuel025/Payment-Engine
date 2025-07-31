@@ -3,7 +3,7 @@ package com.samwellstore.paymentengine.utils.mapper.impl;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
-import com.samwellstore.paymentengine.dto.SignUpRequestDTO;
+import com.samwellstore.paymentengine.dto.AuthenticationDTOs.SignUpRequestDTO;
 import com.samwellstore.paymentengine.entities.Customer;
 import com.samwellstore.paymentengine.utils.mapper.Mapper;
 

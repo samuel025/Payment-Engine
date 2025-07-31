@@ -1,5 +1,6 @@
-package com.samwellstore.paymentengine.dto;
+package com.samwellstore.paymentengine.dto.TransactionDTOs;
 
+import com.samwellstore.paymentengine.dto.PaymentRequestDTOs.PaymentRequestDTO;
 import com.samwellstore.paymentengine.enums.PaymentChannel;
 import com.samwellstore.paymentengine.enums.TransactionStatus;
 import lombok.AllArgsConstructor;

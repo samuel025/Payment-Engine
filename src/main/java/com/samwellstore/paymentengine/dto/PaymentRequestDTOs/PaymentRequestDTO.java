@@ -1,8 +1,8 @@
-package com.samwellstore.paymentengine.dto;
+package com.samwellstore.paymentengine.dto.PaymentRequestDTOs;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
+import com.samwellstore.paymentengine.dto.MerchantDTOs.MerchantWithoutBalanceDTO;
 import com.samwellstore.paymentengine.enums.PaymentStatus;
 
 import lombok.AllArgsConstructor;

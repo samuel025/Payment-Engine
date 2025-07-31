@@ -1,8 +1,8 @@
 package com.samwellstore.paymentengine.services;
 
-import com.samwellstore.paymentengine.dto.AuthResponseDTO;
-import com.samwellstore.paymentengine.dto.LoginRequestDTO;
-import com.samwellstore.paymentengine.dto.SignUpRequestDTO;
+import com.samwellstore.paymentengine.dto.AuthenticationDTOs.AuthResponseDTO;
+import com.samwellstore.paymentengine.dto.AuthenticationDTOs.LoginRequestDTO;
+import com.samwellstore.paymentengine.dto.AuthenticationDTOs.SignUpRequestDTO;
 
 public interface AuthService {
 
