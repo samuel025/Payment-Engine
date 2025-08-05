@@ -1,16 +1,15 @@
 package com.samwellstore.paymentengine.services;
 
-import com.samwellstore.paymentengine.dto.AdminDTOs.AddAdminDTO;
-import com.samwellstore.paymentengine.dto.AdminDTOs.AdminDTO;
-import com.samwellstore.paymentengine.dto.AuthenticationDTOs.AuthResponseDTO;
-import com.samwellstore.paymentengine.dto.AuthenticationDTOs.LoginRequestDTO;
-import com.samwellstore.paymentengine.dto.AuthenticationDTOs.SignUpRequestDTO;
+import com.samwellstore.paymentengine.dto.SignUpDTOs.*;
+import com.samwellstore.paymentengine.dto.LoginDTO.AuthResponseDTO;
+import com.samwellstore.paymentengine.dto.LoginDTO.LoginRequestDTO;
 import jakarta.validation.Valid;
 
 public interface AuthService {
 
-    Object signup(SignUpRequestDTO signUpRequestDto);
+    MerchantSignUpResponseDTO merchantSignup(MerchantSignUpDTO merchantSignUpDto);
+    CustomerSignUpResponseDTO customerSignup(CustomerSignupDTO customerSignupDTO);
     AuthResponseDTO login(LoginRequestDTO signUpRequestDto);
 
-    AdminDTO addAdmin(@Valid AddAdminDTO addadminDTO);
+    AddAdminDTO addAdmin(@Valid AddAdminDTO addadminDTO);
 }

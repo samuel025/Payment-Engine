@@ -1,6 +1,6 @@
 package com.samwellstore.paymentengine.security;
 
-import com.samwellstore.paymentengine.entities.BaseUser;
+import com.samwellstore.paymentengine.entities.User;
 import com.samwellstore.paymentengine.enums.Roles;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,13 +21,13 @@ public class UserPrincipal implements UserDetails {
     private final String firstName;
     private final String lastName;
     private final String phoneNumber;
-    private final Roles userType;
+    private final Roles role;
     private final Boolean isActive;
     private Collection<? extends GrantedAuthority> authorities;
 
-    public static UserPrincipal create(BaseUser user) {
+    public static UserPrincipal create(User user) {
         List<GrantedAuthority> authorities = List.of(
-                new SimpleGrantedAuthority("ROLE_" + user.getUserType())
+                new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
         );
 
         return new UserPrincipal(
@@ -37,7 +37,7 @@ public class UserPrincipal implements UserDetails {
                 user.getFirstName(),
                 user.getLastName(),
                 user.getPhoneNumber(),
-                user.getUserType(),
+                user.getRole(),
                 user.getIsActive(),
                 authorities
         );

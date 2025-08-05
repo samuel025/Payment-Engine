@@ -1,6 +1,6 @@
 package com.samwellstore.paymentengine.dto.TransactionDTOs;
 
-import com.samwellstore.paymentengine.dto.PaymentRequestDTOs.PaymentRequestDTO;
+import com.samwellstore.paymentengine.dto.PaymentDTOs.PaymentDTO;
 import com.samwellstore.paymentengine.enums.PaymentChannel;
 import com.samwellstore.paymentengine.enums.TransactionStatus;
 import lombok.AllArgsConstructor;
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 public class TransactionDTO {
     private Long id;
-    private PaymentRequestDTO paymentRequest;
+    private PaymentDTO paymentRequest;
     private PaymentChannel channel;
     private String transactionReference;
     private TransactionStatus status;

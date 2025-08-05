@@ -24,7 +24,7 @@ public class Transaction {
     // Many Transactions belong to One PaymentRequest
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id", nullable = false)
-    private PaymentRequest paymentRequest;
+    private Payment payment;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "channel", nullable = false)

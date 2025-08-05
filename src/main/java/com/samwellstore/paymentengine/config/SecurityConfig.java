@@ -33,15 +33,18 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/register", "/login","/swagger-ui.html/**", "/swagger-ui/**",
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/transaction/**", "/payment/**").hasRole("CUSTOMER")
+                        .requestMatchers("/merchant/**").hasRole("MERCHANT")
+                        .requestMatchers("/register/**", "/login","/swagger-ui.html/**", "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
                                 "/v3/api-docs.yaml",
                                 "/swagger-resources/**",
                                 "/webjars/**",
-                                "/payment",
-                                "/transaction/**",
-                                "/test/**"
+                                "/test/**",
+                                "/anonymous/payment/**",
+                                "/anonymous/transaction/**"
                         ).permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

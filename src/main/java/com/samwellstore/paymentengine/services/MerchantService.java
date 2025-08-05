@@ -1,7 +1,8 @@
 package com.samwellstore.paymentengine.services;
 
 import com.samwellstore.paymentengine.dto.MerchantDTOs.MerchantDTO;
-import com.samwellstore.paymentengine.dto.PaymentRequestDTOs.PaymentRequestDTO;
+import com.samwellstore.paymentengine.dto.PaymentDTOs.PaymentDTO;
+import com.samwellstore.paymentengine.security.UserPrincipal;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -9,10 +10,7 @@ import java.util.Optional;
 
 
 public interface MerchantService {
-     MerchantDTO createMerchant(MerchantDTO merchant);
-     Optional<BigDecimal> getMerchantWalletBalance(Long id);
+     Optional<BigDecimal> getMerchantWalletBalance(UserPrincipal userPrincipal);
      void creditWallet(Long id, BigDecimal amount);
-
-    List<PaymentRequestDTO> getMerchantPaymentRequests();
-
+    List<PaymentDTO> getMerchantPaymentRequests(UserPrincipal userPrincipal);
 }

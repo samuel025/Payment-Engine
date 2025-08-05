@@ -1,17 +1,15 @@
 package com.samwellstore.paymentengine.services.impl;
 
-import com.samwellstore.paymentengine.Repositories.MerchantRepository;
-import com.samwellstore.paymentengine.Repositories.PaymentRequestRepository;
+import com.samwellstore.paymentengine.Repositories.PaymentRepository;
+import com.samwellstore.paymentengine.Repositories.UserRepository;
 import com.samwellstore.paymentengine.dto.MerchantDTOs.MerchantDTO;
-import com.samwellstore.paymentengine.dto.PaymentRequestDTOs.PaymentRequestDTO;
-import com.samwellstore.paymentengine.entities.Merchant;
-import com.samwellstore.paymentengine.entities.PaymentRequest;
+import com.samwellstore.paymentengine.dto.PaymentDTOs.PaymentDTO;
+import com.samwellstore.paymentengine.entities.Payment;
+import com.samwellstore.paymentengine.entities.User;
 import com.samwellstore.paymentengine.enums.Roles;
 import com.samwellstore.paymentengine.security.UserPrincipal;
 import com.samwellstore.paymentengine.services.MerchantService;
 import com.samwellstore.paymentengine.utils.mapper.Mapper;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,53 +18,40 @@ import java.util.Optional;
 
 @Service
 public class MerchantServiceImpl  implements MerchantService {
-    final MerchantRepository merchantRepository;
-    final PaymentRequestRepository paymentRequestRepository;
-    final Mapper<PaymentRequest, PaymentRequestDTO> paymentMapper;
-    final Mapper<Merchant, MerchantDTO> merchantMapper;
+    final UserRepository userRepository;
+    final PaymentRepository paymentRepository;
+    final Mapper<Payment, PaymentDTO> paymentMapper;
+    final Mapper<User, MerchantDTO> merchantMapper;
 
-    public MerchantServiceImpl(MerchantRepository merchantRepository, PaymentRequestRepository paymentRequestRepository, Mapper<PaymentRequest, PaymentRequestDTO> paymentMapper, Mapper<Merchant, MerchantDTO> merchantMapper) {
+    public MerchantServiceImpl(PaymentRepository paymentRepository, Mapper<Payment, PaymentDTO> paymentMapper, Mapper<User, MerchantDTO> merchantMapper, UserRepository userRepository) {
         this.merchantMapper = merchantMapper;
-        this.merchantRepository = merchantRepository;
-        this.paymentRequestRepository = paymentRequestRepository;
+        this.userRepository = userRepository;
+        this.paymentRepository = paymentRepository;
         this.paymentMapper = paymentMapper;
     }
 
     @Override
-    public MerchantDTO createMerchant(MerchantDTO merchant) {
-        Merchant merchantEntity = merchantMapper.mapFrom(merchant);
-        merchantEntity.setWalletBalance(BigDecimal.ZERO);
-        Merchant savedMerchantEntity =  merchantRepository.save(merchantEntity);
-        return  merchantMapper.mapTo(savedMerchantEntity);
-    }
-
-    @Override
-    public Optional<BigDecimal> getMerchantWalletBalance(Long id) {
-      return merchantRepository.findById(id).map(Merchant::getWalletBalance);
+    public Optional<BigDecimal> getMerchantWalletBalance(UserPrincipal userPrincipal) {
+      return userRepository.findMerchantById(userPrincipal.getId()).map(User::getWalletBalance);
     }
 
     @Override
     public void creditWallet(Long id, BigDecimal amount) {
-        Merchant merchant = merchantRepository.findById(id)
+        User merchant = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Merchant not found"));
         merchant.setWalletBalance(merchant.getWalletBalance().add(amount));
-        merchantRepository.save(merchant);
+        userRepository.save(merchant);
     }
 
     @Override
-    public List<PaymentRequestDTO> getMerchantPaymentRequests() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(authentication != null && authentication.getPrincipal() instanceof UserPrincipal userPrincipal){
-            if(userPrincipal.getUserType().equals(Roles.MERCHANT)){
-                List<PaymentRequest> paymentRequests = paymentRequestRepository.findByMerchantId(userPrincipal.getId());
-                return paymentRequests.stream()
+    public List<PaymentDTO> getMerchantPaymentRequests(UserPrincipal userPrincipal) {
+            if(userPrincipal.getRole().equals(Roles.MERCHANT)){
+                List<Payment> payments = paymentRepository.findByMerchantId(userPrincipal.getId());
+                return payments.stream()
                         .map(paymentMapper::mapTo)
                         .toList();
             } else {
                 throw new IllegalArgumentException("Only merchants can access their payment requests");
             }
-        } else {
-            throw new RuntimeException("Authentication is required to access payment requests");
-        }
     }
 }

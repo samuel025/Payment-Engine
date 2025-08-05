@@ -32,7 +32,7 @@ public class JWTService {
     public String generateToken(Authentication authentication) {
         Map<String, Object> claims = new HashMap<>();
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-        String role = userPrincipal.getUserType().name();
+        String role = userPrincipal.getRole().name();
         claims.put("role", role);
         claims.put("userId", userPrincipal.getId());
 

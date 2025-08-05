@@ -5,3 +5,4 @@ public enum Roles {
     MERCHANT,
     CUSTOMER,
 }
+
