@@ -10,6 +10,7 @@ import com.samwellstore.paymentengine.dto.TransactionDTOs.TransactionDTO;
 import com.samwellstore.paymentengine.entities.Payment;
 import com.samwellstore.paymentengine.entities.Transaction;
 import com.samwellstore.paymentengine.entities.User;
+import com.samwellstore.paymentengine.exceptions.ResourceNotFoundException;
 import com.samwellstore.paymentengine.services.AdminService;
 import com.samwellstore.paymentengine.utils.mapper.Mapper;
 import jakarta.persistence.EntityNotFoundException;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.lang.module.ResolutionException;
 import java.util.List;
 
 
@@ -51,14 +53,14 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public CustomerDTO getCustomerById(Long id) {
         User customer = userRepository.findCustomerById(id)
-                .orElseThrow(() -> new RuntimeException("Customer not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + id));
         return customerMapper.mapTo(customer);
     }
 
     @Override
     public MerchantDTO getMerchantById(Long id) {
         User merchant = userRepository.findMerchantById(id)
-                .orElseThrow(() -> new RuntimeException("Merchant not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Merchant not found with id: " + id));
         return merchantMapper.mapTo(merchant);
     }
 
@@ -77,14 +79,14 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public TransactionDTO findTransactionByReference(String ref){
-        Transaction transaction = transactionRepository.findByTransactionReference(ref).orElseThrow(() -> new EntityNotFoundException("Transaction reference not found"));
+        Transaction transaction = transactionRepository.findByTransactionReference(ref).orElseThrow(() -> new ResourceNotFoundException("Transaction reference not found for reference : " + ref));
         return transactionMapper.mapTo(transaction);
     }
 
     @Override
     public PaymentDTO getPaymentByReference(String reference) {
         Payment payment = paymentRepository.findByReference(reference)
-                .orElseThrow(() -> new EntityNotFoundException("Payment not found with reference: " + reference));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with reference: " + reference));
         return paymentMapper.mapTo(payment);
     }
 

@@ -4,11 +4,13 @@ package com.samwellstore.paymentengine.controllers;
 import com.samwellstore.paymentengine.dto.SignUpDTOs.*;
 import com.samwellstore.paymentengine.dto.LoginDTO.AuthResponseDTO;
 import com.samwellstore.paymentengine.dto.LoginDTO.LoginRequestDTO;
+import com.samwellstore.paymentengine.security.UserPrincipal;
 import com.samwellstore.paymentengine.services.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,8 +42,8 @@ public class AuthController {
     }
 
     @PostMapping("/register/admin")
-    public ResponseEntity<AddAdminDTO> addAdmin(@Valid @RequestBody AddAdminDTO addAdminDTO) {
-        AddAdminDTO createdAdmin = authService.addAdmin(addAdminDTO);
+    public ResponseEntity<AddAdminDTO> addAdmin(@AuthenticationPrincipal UserPrincipal userPrincipal, @Valid @RequestBody AddAdminDTO addAdminDTO) {
+        AddAdminDTO createdAdmin = authService.addAdmin(addAdminDTO, userPrincipal);
         return ResponseEntity.ok(createdAdmin);
     }
 

@@ -7,6 +7,7 @@ import com.samwellstore.paymentengine.entities.Payment;
 import com.samwellstore.paymentengine.entities.Transaction;
 import com.samwellstore.paymentengine.enums.PaymentStatus;
 import com.samwellstore.paymentengine.enums.TransactionStatus;
+import com.samwellstore.paymentengine.exceptions.PaymentException;
 import com.samwellstore.paymentengine.security.UserPrincipal;
 import com.samwellstore.paymentengine.services.MerchantService;
 import com.samwellstore.paymentengine.services.TransactionService;
@@ -42,11 +43,11 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transactionEntity = transactionMapper.mapFrom(transactionDTO);
         Payment paymentEntity = paymentRepository.findByReference(ref).orElseThrow(() -> new EntityNotFoundException("Payment request not found"));
         if(paymentEntity.getStatus() != PaymentStatus.PENDING){
-            throw new RuntimeException("Payment request has been processed");
+            throw new PaymentException("Payment request has been processed");
         }
         boolean hasSuccessfulTransaction = paymentEntity.getTransactions().stream().anyMatch(t -> t.getStatus().equals(TransactionStatus.SUCCESS));
         if(hasSuccessfulTransaction){
-            throw new RuntimeException("Payment already has successful transaction");
+            throw new PaymentException("Payment already has successful transaction");
         }
         transactionEntity.setPayment(paymentEntity);
         transactionEntity.setTransactionReference("TXN_" + UUID.randomUUID().toString().substring(0, 8));
@@ -79,11 +80,11 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transactionEntity = transactionMapper.mapFrom(transactionDTO);
         Payment paymentEntity = paymentRepository.findByReference(ref).orElseThrow(() -> new EntityNotFoundException("Payment request not found"));
         if (paymentEntity.getStatus() != PaymentStatus.PENDING) {
-            throw new RuntimeException("Payment request has been processed");
+            throw new PaymentException("Payment has been processed");
         }
         boolean hasSuccessfulTransaction = paymentEntity.getTransactions().stream().anyMatch(t -> t.getStatus().equals(TransactionStatus.SUCCESS));
         if (hasSuccessfulTransaction) {
-            throw new RuntimeException("Payment already has successful transaction");
+            throw new PaymentException("Payment already has successful transaction");
         }
         transactionEntity.setPayment(paymentEntity);
         transactionEntity.setTransactionReference("TXN_" + UUID.randomUUID().toString().substring(0, 8));

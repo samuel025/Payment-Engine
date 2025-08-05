@@ -1,6 +1,7 @@
 package com.samwellstore.paymentengine.config;
 
 
+import com.samwellstore.paymentengine.exceptions.CustomAccessDeniedHandler;
 import com.samwellstore.paymentengine.security.JWTFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +27,9 @@ public class SecurityConfig {
     private UserDetailsService userDetailsService;
 
     @Autowired
+    private CustomAccessDeniedHandler accessDeniedHandler;
+
+    @Autowired
     private JWTFilter jwtFilter;
 
     @Bean
@@ -33,7 +37,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**", "/register/admin").hasRole("ADMIN")
                         .requestMatchers("/transaction/**", "/payment/**").hasRole("CUSTOMER")
                         .requestMatchers("/merchant/**").hasRole("MERCHANT")
                         .requestMatchers("/register/**", "/login","/swagger-ui.html/**", "/swagger-ui/**",
@@ -47,6 +51,7 @@ public class SecurityConfig {
                                 "/anonymous/transaction/**"
                         ).permitAll()
                         .anyRequest().authenticated())
+                .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

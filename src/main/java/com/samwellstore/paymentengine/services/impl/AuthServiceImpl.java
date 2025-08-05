@@ -1,12 +1,15 @@
 package com.samwellstore.paymentengine.services.impl;
 
+import java.math.BigDecimal;
+
+import com.samwellstore.paymentengine.exceptions.RoleAccessDeniedException;
+import com.samwellstore.paymentengine.exceptions.UserAlreadyExistsException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,14 +23,14 @@ import com.samwellstore.paymentengine.dto.SignUpDTOs.MerchantSignUpDTO;
 import com.samwellstore.paymentengine.dto.SignUpDTOs.MerchantSignUpResponseDTO;
 import com.samwellstore.paymentengine.entities.User;
 import com.samwellstore.paymentengine.enums.Roles;
+import com.samwellstore.paymentengine.exceptions.AuthenticationException;
+import com.samwellstore.paymentengine.exceptions.ResourceNotFoundException;
 import com.samwellstore.paymentengine.security.JWTService;
 import com.samwellstore.paymentengine.security.UserPrincipal;
 import com.samwellstore.paymentengine.services.AuthService;
 import com.samwellstore.paymentengine.utils.mapper.Mapper;
 
 import lombok.extern.slf4j.Slf4j;
-
-import java.math.BigDecimal;
 
 
 @Service
@@ -64,7 +67,7 @@ public class AuthServiceImpl implements AuthService {
     public MerchantSignUpResponseDTO merchantSignup(MerchantSignUpDTO merchantSignUpDto) {
         log.info("Signing up merchant with: {}", merchantSignUpDto);
         if(userRepository.existsByEmail(merchantSignUpDto.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new UserAlreadyExistsException("Email already exists");
         }
         Roles userType = merchantSignUpDto.getRole();
         if(userType == Roles.MERCHANT) {
@@ -84,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
     public CustomerSignUpResponseDTO customerSignup(CustomerSignupDTO customerSignupDTO) {
         log.info("Signing up customer with: {}", customerSignupDTO);
         if(userRepository.existsByEmail(customerSignupDTO.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new UserAlreadyExistsException("Email already exists");
         }
         Roles userType = customerSignupDTO.getRole();
         if(userType == Roles.CUSTOMER) {
@@ -104,11 +107,9 @@ public class AuthServiceImpl implements AuthService {
         log.info("Attempting login for user: {}", loginRequestDTO.getEmail());
         
         try {
-            // Check if user exists
             User user = userRepository.findByEmail(loginRequestDTO.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", loginRequestDTO.getEmail()));
 
-            
             // Attempt authentication
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -126,27 +127,28 @@ public class AuthServiceImpl implements AuthService {
                 );
             }
             
-            throw new BadCredentialsException("Invalid credentials");
-        } catch (Exception e) {
+            throw new AuthenticationException("Invalid credentials");
+        } catch (BadCredentialsException e) {
             log.error("Login failed for user {}: {}", loginRequestDTO.getEmail(), e.getMessage());
+            throw new AuthenticationException("Invalid email or password");
+        } catch (DisabledException e) {
+            log.error("Login failed for user {}: account disabled", loginRequestDTO.getEmail());
+            throw new AuthenticationException("Your account is disabled");
+        } catch (Exception e) {
+            log.error("Login failed for  {}: {}", loginRequestDTO.getEmail(), e.getMessage());
             throw e;
         }
     }
 
     @Override
-    public AddAdminDTO addAdmin(AddAdminDTO addAdminDTO) {
+    public AddAdminDTO addAdmin(AddAdminDTO addAdminDTO, UserPrincipal userPrincipal) {
         log.info("Adding admin: {}", addAdminDTO);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof UserPrincipal userPrincipal){
-            if( !userPrincipal.getRole().equals(Roles.ADMIN)) {
-                throw new RuntimeException("Only admins can add other admins");
-            }
+        if (userRepository.existsByEmail(addAdminDTO.getEmail())) {
+            throw new UserAlreadyExistsException("Email already exists");
+        }
             String hashedPassword = bCryptPasswordEncoder.encode(addAdminDTO.getPassword());
             addAdminDTO.setPassword(hashedPassword);
             User adminEntity = addAdminMapper.mapFrom(addAdminDTO);
             return addAdminMapper.mapTo(userRepository.save(adminEntity));
-        } else {
-            throw new IllegalArgumentException("Admin Authentication is required to add an admin");
-        }
     }
 }

@@ -9,6 +9,7 @@ import com.samwellstore.paymentengine.Repositories.UserRepository;
 import com.samwellstore.paymentengine.dto.TransactionDTOs.TransactionDTO;
 import com.samwellstore.paymentengine.entities.*;
 import com.samwellstore.paymentengine.enums.Roles;
+import com.samwellstore.paymentengine.exceptions.ResourceNotFoundException;
 import com.samwellstore.paymentengine.security.UserPrincipal;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
@@ -41,11 +42,11 @@ public class PaymentServiceImpl implements PaymentService {
 
         Payment paymentEntity = paymentMapper.mapFrom(paymentDTO);
         User merchant = userRepository.findMerchantById(merchantId)
-                .orElseThrow(() -> new EntityNotFoundException("Merchant not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Merchant not found"));
         paymentEntity.setMerchant(merchant);
 
         User customer = userRepository.findCustomerById(userPrincipal.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Customer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
         paymentEntity.setCustomer(customer);
 
         paymentEntity.setReference("PAY_" + UUID.randomUUID().toString().substring(0, 8));
@@ -63,7 +64,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         Payment paymentEntity = paymentMapper.mapFrom(paymentDTO);
         User merchant = userRepository.findMerchantById(merchantId)
-                .orElseThrow(() -> new EntityNotFoundException("Merchant not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Merchant not found"));
         paymentEntity.setMerchant(merchant);
 
         paymentEntity.setCustomerName(paymentDTO.getCustomerName());
@@ -80,24 +81,19 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public List<PaymentDTO> getPayments(UserPrincipal userPrincipal) {
-        if(userPrincipal.getRole().equals(Roles.CUSTOMER)) {
             List<Payment> payments = paymentRepository.findByCustomerId(userPrincipal.getId());
             return payments.stream().map(paymentMapper::mapTo).collect(Collectors.toList());
-        } else {
-            throw new AuthenticationException("Customer authentication required") {
-            };
-        }
     }
 
     @Override
     public List<TransactionDTO> customerGetTransactionsByPaymentRequest(String paymentReference, UserPrincipal userPrincipal) {
         Payment payment = paymentRepository.findByReference(paymentReference)
-                .orElseThrow(() -> new EntityNotFoundException("Payment not found with reference: " + paymentReference));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with reference: " + paymentReference));
         if (payment.getCustomer() != null && payment.getCustomer().getId().equals(userPrincipal.getId())) {
             List<Transaction> transactions = payment.getTransactions();
             return transactions.stream().map(transactionMapper::mapTo).collect(Collectors.toList());
         } else {
-            throw new EntityNotFoundException("No transactions found for payment request with ID: " + paymentReference);
+            throw new ResourceNotFoundException("No transactions found for payment request with ID: " + paymentReference);
         }
     }
 }

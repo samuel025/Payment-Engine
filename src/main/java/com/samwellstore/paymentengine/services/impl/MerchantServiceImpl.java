@@ -7,6 +7,7 @@ import com.samwellstore.paymentengine.dto.PaymentDTOs.PaymentDTO;
 import com.samwellstore.paymentengine.entities.Payment;
 import com.samwellstore.paymentengine.entities.User;
 import com.samwellstore.paymentengine.enums.Roles;
+import com.samwellstore.paymentengine.exceptions.ResourceNotFoundException;
 import com.samwellstore.paymentengine.security.UserPrincipal;
 import com.samwellstore.paymentengine.services.MerchantService;
 import com.samwellstore.paymentengine.utils.mapper.Mapper;
@@ -38,7 +39,7 @@ public class MerchantServiceImpl  implements MerchantService {
     @Override
     public void creditWallet(Long id, BigDecimal amount) {
         User merchant = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Merchant not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Merchant not found"));
         merchant.setWalletBalance(merchant.getWalletBalance().add(amount));
         userRepository.save(merchant);
     }
